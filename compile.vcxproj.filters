@@ -60,6 +60,9 @@
     <ClCompile Include="opt\table.cpp">
       <Filter>源文件\opt</Filter>
     </ClCompile>
+    <ClCompile Include="front\match_token.cpp">
+      <Filter>源文件\front</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="define.h">
@@ -82,6 +85,9 @@
     </ClInclude>
     <ClInclude Include="mid\ast.h">
       <Filter>头文件\mid</Filter>
+    </ClInclude>
+    <ClInclude Include="front\match_token.h">
+      <Filter>头文件\front</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

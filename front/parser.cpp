@@ -87,7 +87,7 @@ size_t IdentType() {
 	return count;
 }
 
-inline void printLookHead() { // 往后打印10个数字
+inline void printlookHead() { // 往后打印10个数字
 	assert(readIndex + 10 < _tokenNameVector.size());
 	for (int ii = 0; ii < 10; ii++)
 		std::cout << _tokenVector[readIndex + ii] << " ";
@@ -107,11 +107,11 @@ inline std::string getNextNumToken(const size_t& num) {
 
 void getNextToken() { // 同时输出当前匹配的终结符信息到文件中
 	if (outputFile.is_open() && LexOut) {
-		outputFile << globalCurrentTokenName << " " << _tokenVector[readIndex] << std::endl;
+		outputFile << lookHeadName << " " << _tokenVector[readIndex] << std::endl;
 	}
 	if (readIndex + 1 < _tokenNameVector.size()) {
-		globalCurrentToken = _tokenVector[readIndex + 1];
-		globalCurrentTokenName = _tokenNameVector[++readIndex];
+		lookHead = _tokenVector[readIndex + 1];
+		lookHeadName = _tokenNameVector[++readIndex];
 	}
 }
 // 输出语法分析结果
@@ -185,8 +185,8 @@ void init(std::vector<std::string>& tokenVector,
 	//_lineNumberVector.insert(_lineNumberVector.end(), lineNumberVector.begin(), lineNumberVector.end());
 
 	readIndex = 0;
-	globalCurrentTokenName = _tokenNameVector[readIndex];
-	globalCurrentToken = _tokenVector[readIndex];
+	lookHeadName = _tokenNameVector[readIndex];
+	lookHead = _tokenVector[readIndex];
 
 	// 默认先不进行语义分析
 	isSemantic = false;
@@ -221,9 +221,9 @@ std::shared_ptr<CompUnitNode> CompUnit() {
 std::shared_ptr<DeclNode> Decl() {
 	auto cur = std::make_shared<DeclNode>("Decl");
 
-	if (globalCurrentTokenName == "CONSTTK") 
+	if (lookHeadName == "CONSTTK") 
 		cur->const_decl = ConstDecl();
-	else if (globalCurrentTokenName == "INTTK" && getNextSecondToken() != "MAINTK") 
+	else if (lookHeadName == "INTTK" && getNextSecondToken() != "MAINTK") 
 		cur->var_decl = VarDecl();
 
 	return cur;
@@ -236,7 +236,7 @@ std::shared_ptr<FuncDefNode> FuncDef() {
 	TableSpace::newScope();
 	
 	const std::string funcName = _tokenVector[readIndex+1]; // 得到函数名
-	TableSpace::ReturnType retType = (globalCurrentToken == "int") ? TableSpace::Int : TableSpace::Void; // 得到函数返回值类型
+	TableSpace::ReturnType retType = (lookHead == "int") ? TableSpace::Int : TableSpace::Void; // 得到函数返回值类型
 	//std::vector<std::string> paramType; // 得到函数参数类型
 	//std::vector<std::string> paramsName; // 得到函数实参变量名
 	//std::pair<std::vector<std::string>, std::vector<std::string>> typeNamePair = std::make_pair(paramType, paramsName);
@@ -248,7 +248,7 @@ std::shared_ptr<FuncDefNode> FuncDef() {
 	cur->func_type = FuncType();
 	cur->ident = Ident(true);
 	matchTokenLparent(); // (
-	if (globalCurrentTokenName != "RPARENT") { // )
+	if (lookHeadName != "RPARENT") { // )
 		cur->func_f_params = FuncFParams(typeNameVector);
 	}
 	matchTokenRparent(J); // )
@@ -324,7 +324,7 @@ std::shared_ptr<VarDeclNode> VarDecl(const bool& isConstDecl) {
 	w = cur->btype->width;
 	cur->vardef.push_back(VarDef(isConstDecl));
 	// 下面的内容可以重复0次或多次
-	while (globalCurrentTokenName == "COMMA") { // ,
+	while (lookHeadName == "COMMA") { // ,
 		matchTokenComma();
 		cur->vardef.push_back(VarDef(isConstDecl));
 	}
@@ -338,7 +338,7 @@ std::shared_ptr<VarDeclNode> VarDecl(const bool& isConstDecl) {
 std::shared_ptr<FuncTypeNode> FuncType() {
 	auto cur = std::make_shared<FuncTypeNode>("FuncType");
 
-	if (globalCurrentTokenName == "VOIDTK") { // void
+	if (lookHeadName == "VOIDTK") { // void
 		matchTokenVoid(); // void
 		cur->funcType = "void";
 	}
@@ -353,7 +353,7 @@ std::shared_ptr<FuncTypeNode> FuncType() {
 std::shared_ptr<IdentNode> Ident(const bool& isDecl) {
 	auto cur = std::make_shared<IdentNode>("Ident");
 
-	cur->lexeme = globalCurrentToken;
+	cur->lexeme = lookHead;
 	matchTokenIdent(isDecl);
 
 	return cur;
@@ -367,7 +367,7 @@ std::shared_ptr<FuncFParamsNode> FuncFParams(std::vector<std::pair<std::string, 
 	cur->func_f_param.push_back(FuncFParam(currentTypeNamePair));
 	typeNameVector.push_back(currentTypeNamePair);
 
-	while (globalCurrentTokenName == "COMMA") { // ,
+	while (lookHeadName == "COMMA") { // ,
 		currentTypeNamePair.first = "";
 		currentTypeNamePair.second = "";
 
@@ -394,7 +394,7 @@ std::shared_ptr<BlockNode> Block() {
 	auto cur = std::make_shared<BlockNode>("Block");
 
 	matchTokenLbrace(); // {
-	while (globalCurrentTokenName != "RBRACE") {
+	while (lookHeadName != "RBRACE") {
 		cur->block_item.push_back(BlockItem());
 		if (retUseful) {
 			TableSpace::remove();
@@ -419,7 +419,7 @@ std::shared_ptr<BlockNode> FuncBlock(std::vector<std::pair<std::string, std::str
 	auto cur = std::make_shared<BlockNode>("Block");
 
 	matchTokenLbrace(); // {
-	while (globalCurrentTokenName != "RBRACE") {
+	while (lookHeadName != "RBRACE") {
 		cur->block_item.push_back(BlockItem());
 		if (retUseful)
 			break;
@@ -448,13 +448,13 @@ std::shared_ptr<VarDefNode> VarDef(const bool& isConstDef) {
  	std::string identType;
 
 	// ------------------------排除重定义------------------------
-	TableSpace::TableItem outcome = TableSpace::query(globalCurrentToken, true);
+	TableSpace::TableItem outcome = TableSpace::query(lookHead, true);
 	if (outcome.kind != TableSpace::null)
 		errorHandle(B, _lineNumberVector[readIndex]);
 	// ---------------------------------------------------------
 
 	// ------------------------得到当前变量名和类型------------------------
-	const std::string identName = globalCurrentToken;
+	const std::string identName = lookHead;
 	std::string val = "null";
 	TableSpace::Kind kind = (isConstDef == true) ? TableSpace::constant : TableSpace::variable;
 	// ---------------------------------------------------------
@@ -466,7 +466,7 @@ std::shared_ptr<VarDefNode> VarDef(const bool& isConstDef) {
 	cur->ident = Ident(true);
 	cur->array = Array();
 
-	if (globalCurrentTokenName == "ASSIGN") { // 匹配终结符=
+	if (lookHeadName == "ASSIGN") { // 匹配终结符=
 		matchTokenAssign();
 		cur->initval = InitVal(isConstDef);
 		val = std::to_string(cur->initval->val);
@@ -481,7 +481,7 @@ std::shared_ptr<VarDefNode> VarDef(const bool& isConstDef) {
 std::shared_ptr<ArrayNode> Array() {
 	auto cur = std::make_shared<ArrayNode>("Array");
 
-	if (globalCurrentTokenName == "LBRACK") {  // C -> [num]C1
+	if (lookHeadName == "LBRACK") {  // C -> [num]C1
 		matchTokenLbrack();  // [
 		cur->const_exp = ConstExp();  // 此时ConstExp的值就是num的值
 		matchTokenRbrack(K);  // ]
@@ -502,11 +502,11 @@ std::shared_ptr<FuncFParamNode> FuncFParam(std::pair<std::string, std::string>& 
 
 	cur->btype = BType();
 	cur->ident = Ident(true);
-	if (globalCurrentTokenName == "LBRACK") { // [
+	if (lookHeadName == "LBRACK") { // [
 		matchTokenLbrack(); // [
 		currentTypeNamePair.first += "[";
 		matchTokenRbrack(K); // ]
-		while (globalCurrentTokenName == "LBRACK") { // [
+		while (lookHeadName == "LBRACK") { // [
 			matchTokenLbrack(); // [
 			currentTypeNamePair.first += "[";
 			cur->const_exp.push_back(ConstExp());
@@ -520,7 +520,7 @@ std::shared_ptr<FuncFParamNode> FuncFParam(std::pair<std::string, std::string>& 
 std::shared_ptr<BlockItemNode> BlockItem() {
 	auto cur = std::make_shared<BlockItemNode>("BlockItem");
 
-	if (globalCurrentTokenName == "CONSTTK" || globalCurrentTokenName == "INTTK")  // 选择产生式Decl
+	if (lookHeadName == "CONSTTK" || lookHeadName == "INTTK")  // 选择产生式Decl
 		cur->decl = Decl();
 	else {
 		cur->stmt = Stmt();
@@ -542,14 +542,14 @@ std::shared_ptr<ConstExpNode> ConstExp() {
 std::shared_ptr<InitValNode> InitVal(const bool& isConstInitVal) {
 	auto cur = std::make_shared<InitValNode>("InitVal");
 
-	if (globalCurrentTokenName == "LBRACE") { // {
+	if (lookHeadName == "LBRACE") { // {
 		matchTokenLbrace(); // {
-		if (globalCurrentTokenName == "RBRACE") { // 判断是否有 }
+		if (lookHeadName == "RBRACE") { // 判断是否有 }
 			matchTokenRbrace(); // }
 		}
 		else {
 			cur->init_val.push_back(InitVal(isConstInitVal));
-			while (globalCurrentTokenName == "COMMA") { // ,
+			while (lookHeadName == "COMMA") { // ,
 				matchTokenComma();
 				cur->init_val.push_back(InitVal(isConstInitVal));
 			}
@@ -567,15 +567,15 @@ std::shared_ptr<InitValNode> InitVal(const bool& isConstInitVal) {
 // 17-语句
 std::shared_ptr<StmtNode> Stmt() {
 	auto cur = std::make_shared<StmtNode>("Stmt");
-	if (globalCurrentToken == "result")
+	if (lookHead == "result")
 		printf("");
 
-	if (globalCurrentTokenName == "PRINTFTK") { // printf
+	if (lookHeadName == "PRINTFTK") { // printf
 		matchTokenPrintf();
 		matchTokenLparent(); // (
 
 		cur->format_char = FormatString();  // 要输出的内容
-		while (globalCurrentTokenName == "COMMA") { // ,
+		while (lookHeadName == "COMMA") { // ,
 			matchTokenComma(); // ,
 			cur->exp = Exp();  // 需要匹配的参数
 			cur->format_char->print_exp.push_back(cur->exp->val);
@@ -588,7 +588,7 @@ std::shared_ptr<StmtNode> Stmt() {
 		matchTokenRparent(); // )
 		matchTokenSemicn(I); // ;
 	}  
-	else if (globalCurrentTokenName == "IFTK") { // if
+	else if (lookHeadName == "IFTK") { // if
 		++IfNum;
 		// newlabel()
 		bool isFirst;
@@ -623,7 +623,7 @@ std::shared_ptr<StmtNode> Stmt() {
 
 			//gen(isFirst, GOTO, cur->stmt1->next);    
 
-			if (globalCurrentTokenName == "ELSETK") { // else
+			if (lookHeadName == "ELSETK") { // else
 				bool temp_is_semantic = isSemantic;
 
 				if (isSemantic && cur->cond->cond)   // if有效，跳过else
@@ -652,7 +652,7 @@ std::shared_ptr<StmtNode> Stmt() {
 			--IfNum;
 		}
 	}
-	else if (globalCurrentTokenName == "WHILETK") { // while
+	else if (lookHeadName == "WHILETK") { // while
 		IfNum++;
 		insertFlag(emInLoop);
 		int cond_false;
@@ -715,17 +715,17 @@ std::shared_ptr<StmtNode> Stmt() {
 		--IfNum;
 		eraseFlag();
 	}
-	else if (globalCurrentTokenName == "BREAKTK") { // break
+	else if (lookHeadName == "BREAKTK") { // break
 		matchTokenBreak(); // break
 		matchTokenSemicn(I); // ;
 	}
-	else if (globalCurrentTokenName == "CONTINUETK") { // continue
+	else if (lookHeadName == "CONTINUETK") { // continue
 		matchTokenContinue(); // continue
 		matchTokenSemicn(I); // ;
 	}
-	else if (globalCurrentTokenName == "RETURNTK") { // return
+	else if (lookHeadName == "RETURNTK") { // return
 		matchTokenReturn(); // return
-		if (globalCurrentTokenName != "SEMICN") {
+		if (lookHeadName != "SEMICN") {
 			if (currentEmFlag == emInFunc) { // 当前是函数声明
 				TableSpace::FuncItem funcItem = TableSpace::getLastestFunc();
 				if (funcItem.retType == TableSpace::Void)
@@ -746,17 +746,17 @@ std::shared_ptr<StmtNode> Stmt() {
 		matchTokenSemicn(I); // ;
 		haveReturn = true;
 	}
-	else if (globalCurrentTokenName == "LBRACE") { // Block
+	else if (lookHeadName == "LBRACE") { // Block
 		cur->block = Block();
 	}
 	else if (isHaveWantInStmt("=")) { // 选择LVal
-		if (TableSpace::isConstIdent(globalCurrentToken)) { // 判断常量
+		if (TableSpace::isConstIdent(lookHead)) { // 判断常量
 			errorHandle(H, _lineNumberVector[readIndex]);
 		}
 
 		cur->lval = LVal();
 		matchTokenAssign(); // =
-		if (globalCurrentTokenName == "GETINTTK") { // 选择getint
+		if (lookHeadName == "GETINTTK") { // 选择getint
 			matchTokenGetint(); // getint
 			matchTokenLparent(); // (
 			matchTokenRparent(); // )
@@ -779,7 +779,7 @@ std::shared_ptr<StmtNode> Stmt() {
 		//gen(true, ASSIGN, cur->exp->lexeme, cur->lval->ident->lexeme);
 	}
 	else {
-		if (globalCurrentTokenName == "SEMICN") { // ;
+		if (lookHeadName == "SEMICN") { // ;
 			matchTokenSemicn(I);
 		}
 		else {
@@ -795,7 +795,7 @@ std::shared_ptr<AddExpNode> AddExp() {
 	auto cur = std::make_shared<AddExpNode>("AddExp");
 
 	bool isUnaryOp = true;
-	if (globalCurrentTokenName != "PLUS" && globalCurrentTokenName != "MINU") {
+	if (lookHeadName != "PLUS" && lookHeadName != "MINU") {
 		cur->mul_exp = MulExp(); // 进入该if语句，说明不是以正负号开头
 		cur->val = cur->mul_exp->val;
 		
@@ -849,18 +849,18 @@ std::shared_ptr<AddExpNode> AddExp() {
 }
 std::shared_ptr<AddExp_Node> AddExp_(const bool& isUnaryOp) {
  	auto cur = std::make_shared<AddExp_Node>("AddExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
 	bool nextIsUnaryOp = false;
-	if (globalCurrentTokenName == "PLUS") matchTokenPlus(); // +
-	else if (globalCurrentTokenName == "MINU") matchTokenMinu(); // -
+	if (lookHeadName == "PLUS") matchTokenPlus(); // +
+	else if (lookHeadName == "MINU") matchTokenMinu(); // -
 	else return nullptr;
 	if (isUnaryOp) { // 此时加减代表正负号
 		outFileParserResult("UnaryOp");
 		bracketNameStack.push("PNSign");
 	}
-	if (globalCurrentTokenName != "PLUS"
-		&& globalCurrentTokenName != "MINU") {
+	if (lookHeadName != "PLUS"
+		&& lookHeadName != "MINU") {
 		cur->mul_exp = MulExp();
 		cur->val = cur->mul_exp->val;
 		
@@ -918,7 +918,7 @@ std::shared_ptr<LValNode> LVal() {
 
 	cur->ident = Ident(false);
 	cur->lexeme = cur->ident->lexeme;
-	while (globalCurrentTokenName == "LBRACK") { // [
+	while (lookHeadName == "LBRACK") { // [
 		matchTokenLbrack(); // [
 		bracketNameStack.push("LBRACK");
 		cur->exp = Exp();
@@ -940,7 +940,7 @@ std::shared_ptr<LValNode> LVal() {
 std::shared_ptr<CondNode> Cond() {
 	auto cur = std::make_shared<CondNode>("Cond");
 
-	if (globalCurrentTokenName == "NOT") {
+	if (lookHeadName == "NOT") {
 		matchTokenNot();
 		outFileParserResult("UnaryOp");
 		++currentUnaryExpCount;
@@ -957,11 +957,11 @@ std::shared_ptr<CondNode> Cond() {
 std::shared_ptr<FormatCharNode> FormatString() {
 	auto cur = std::make_shared<FormatCharNode>("FormatString");
 	std::string searchStr = "%d";
-	cur->out_string = globalCurrentToken.substr(1, globalCurrentToken.size()-2);
+	cur->out_string = lookHead.substr(1, lookHead.size()-2);
 	cur->d_num = 0;
 
 	size_t pos = 0;
-	while ((pos = globalCurrentToken.find(searchStr, pos)) != std::string::npos) {
+	while ((pos = lookHead.find(searchStr, pos)) != std::string::npos) {
 		++cur->d_num;
 		pos += searchStr.length();
 	}
@@ -979,7 +979,7 @@ std::shared_ptr<MulExpNode> MulExp() {
 	cur->temp_name = cur->unary_exp->lexeme;
 
 	outFileParserResult("MulExp");
-	if (globalCurrentToken == "/")
+	if (lookHead == "/")
 		printf("");
 
 	cur->_mul_exp = MulExp_();
@@ -997,11 +997,11 @@ std::shared_ptr<MulExpNode> MulExp() {
 }
 std::shared_ptr<MulExp_Node> MulExp_() {
 	auto cur = std::make_shared<MulExp_Node>("MulExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
-	if (globalCurrentTokenName == "MULT") matchTokenMult(); // *
-	else if (globalCurrentTokenName == "DIV") matchTokenDiv(); // /
-	else if (globalCurrentTokenName == "MOD") matchTokenMod(); // %
+	if (lookHeadName == "MULT") matchTokenMult(); // *
+	else if (lookHeadName == "DIV") matchTokenDiv(); // /
+	else if (lookHeadName == "MOD") matchTokenMod(); // %
 	else return nullptr;
 	cur->unary_exp = UnaryExp();
 	cur->val = cur->unary_exp->val;
@@ -1039,11 +1039,11 @@ std::shared_ptr<LOrExpNode> LOrExp() {
 }
 std::shared_ptr<LOrExp_Node> LOrExp_() {
 	auto cur = std::make_shared<LOrExp_Node>("LOrExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
-	if (globalCurrentTokenName == "OR") matchTokenOr(); // ||
+	if (lookHeadName == "OR") matchTokenOr(); // ||
 	else return nullptr; // null
-	if (globalCurrentTokenName == "NOT") {
+	if (lookHeadName == "NOT") {
 		matchTokenNot();
 		outFileParserResult("UnaryOp");
 		++currentUnaryExpCount;
@@ -1076,11 +1076,11 @@ std::shared_ptr<LAndExpNode> LAndExp() {
 }
 std::shared_ptr<LAndExp_Node> LAndExp_() {
 	auto cur = std::make_shared<LAndExp_Node>("LAndExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
-	if (globalCurrentTokenName == "AND") matchTokenAnd(); // &&
+	if (lookHeadName == "AND") matchTokenAnd(); // &&
 	else return nullptr; // null
-	if (globalCurrentTokenName == "NOT") {
+	if (lookHeadName == "NOT") {
 		matchTokenNot();
 		outFileParserResult("UnaryOp");
 		++currentUnaryExpCount;
@@ -1116,12 +1116,12 @@ std::shared_ptr<EqExpNode> EqExp() {
 }
 std::shared_ptr<EqExp_Node> EqExp_() {
 	auto cur = std::make_shared<EqExp_Node>("EqExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
-	if (globalCurrentTokenName == "EQL") matchTokenEql(); // ==
-	else if (globalCurrentTokenName == "NEQ") matchTokenNeq(); // !=
+	if (lookHeadName == "EQL") matchTokenEql(); // ==
+	else if (lookHeadName == "NEQ") matchTokenNeq(); // !=
 	else return nullptr;
-	if (globalCurrentTokenName == "NOT") matchTokenNot();
+	if (lookHeadName == "NOT") matchTokenNot();
 	cur->rel_exp = RelExp();
 	outFileParserResult("EqExp");
 	cur->_eq_exp = EqExp_();
@@ -1132,20 +1132,20 @@ std::shared_ptr<EqExp_Node> EqExp_() {
 std::shared_ptr<UnaryExpNode> UnaryExp() {
 	auto cur = std::make_shared<UnaryExpNode>("UnaryExp");
 
-	if (globalCurrentToken == "fib")
+	if (lookHead == "fib")
 		printf("");
 
 	if (getNextSecondToken() == "LPARENT") { // (，函数调用
 		insertFlag(emFuncUse);
 		
 		// 得到调用的函数内容
-		TableSpace::FuncItem outcome = TableSpace::FuncQuery(globalCurrentToken);
+		TableSpace::FuncItem outcome = TableSpace::FuncQuery(lookHead);
 		std::vector<std::pair<std::string, std::string>> typeNameVector = outcome.typeNameVector;
 		size_t funParamNum = 0;
 
 		cur->ident = Ident(true); // 此位置的true是为了减少麻烦，但是不容易理解，解决函数名是否提前定义
 		matchTokenLparent(); // (
-		if (globalCurrentTokenName != "RPARENT") { // )
+		if (lookHeadName != "RPARENT") { // )
 			// 这里需要对函数形参进行赋值
 			cur->func_r_params = FuncRParams(funParamNum, typeNameVector);
 		}
@@ -1169,8 +1169,8 @@ std::shared_ptr<UnaryExpNode> UnaryExp() {
 		matchTokenRparent(J); // )
 		eraseFlag();
 	}
-	/*else if (globalCurrentTokenName == "PLUS" || globalCurrentTokenName == "MIUS"
-		|| globalCurrentTokenName == "NOT")
+	/*else if (lookHeadName == "PLUS" || lookHeadName == "MIUS"
+		|| lookHeadName == "NOT")
 		UnaryOp();*/
 	else {
 		cur->primary_exp = PrimaryExp();
@@ -1224,14 +1224,14 @@ std::shared_ptr<RelExpNode> RelExp() {
 }
 std::shared_ptr<RelExp_Node> RelExp_() {
 	auto cur = std::make_shared<RelExp_Node>("RelExp_");
-	cur->op_type = globalCurrentToken;
+	cur->op_type = lookHead;
 
-	if (globalCurrentTokenName == "LSS") matchTokenLss(); // <
-	else if (globalCurrentTokenName == "GRE") matchTokenGre(); // >
-	else if (globalCurrentTokenName == "LEQ") matchTokenLeq(); // <=
-	else if (globalCurrentTokenName == "GEQ") matchTokenGeq(); // >=
+	if (lookHeadName == "LSS") matchTokenLss(); // <
+	else if (lookHeadName == "GRE") matchTokenGre(); // >
+	else if (lookHeadName == "LEQ") matchTokenLeq(); // <=
+	else if (lookHeadName == "GEQ") matchTokenGeq(); // >=
 	else return nullptr;
-	if (globalCurrentTokenName == "NOT") matchTokenNot();
+	if (lookHeadName == "NOT") matchTokenNot();
 	cur->add_exp = AddExp();
 	outFileParserResult("RelExp");
 	cur->_rel_exp = RelExp_();
@@ -1254,7 +1254,7 @@ std::shared_ptr<RelExp_Node> RelExp_() {
 std::shared_ptr<CharNode> Char() {
 	auto cur = std::make_shared<CharNode>("Char");
 
-	if (globalCurrentToken[0] == '%') { // 选择FormatChar
+	if (lookHead[0] == '%') { // 选择FormatChar
 		cur->format_char = FormatChar();
 	}
 	else {
@@ -1266,7 +1266,7 @@ std::shared_ptr<CharNode> Char() {
 std::shared_ptr<FormatCharNode> FormatChar() {
 	auto cur = std::make_shared<FormatCharNode>("FormatChar");
 
-	if (globalCurrentToken == "%d") {
+	if (lookHead == "%d") {
 		getNextToken();
 	}
 	return cur;
@@ -1279,7 +1279,7 @@ std::shared_ptr<NormalCharNode> NormalChar() {
 std::shared_ptr<PrimaryExpNode> PrimaryExp() {
 	auto cur = std::make_shared<PrimaryExpNode>("PrimaryExp");
 
-	if (globalCurrentTokenName == "LPARENT") { // 匹配终结符(
+	if (lookHeadName == "LPARENT") { // 匹配终结符(
 		matchTokenLparent(); // (
 		bracketNameStack.push("LPARENT");
 		cur->exp = Exp();
@@ -1287,8 +1287,8 @@ std::shared_ptr<PrimaryExpNode> PrimaryExp() {
 		matchTokenRparent(); // )
 		bracketNameStack.pop();
 	}
-	else if ((globalCurrentToken >= "A" && globalCurrentToken <= "Z")
-		|| (globalCurrentToken >= "a" && globalCurrentToken <= "z")) { // 判断为first(Ident)
+	else if ((lookHead >= "A" && lookHead <= "Z")
+		|| (lookHead >= "a" && lookHead <= "z")) { // 判断为first(Ident)
 		cur->lval = LVal();
 		cur->lexeme = cur->lval->lexeme;
 		cur->val = cur->lval->val;
@@ -1309,19 +1309,19 @@ std::shared_ptr<FuncRParamsNode> FuncRParams(size_t& funParamNum, const std::vec
 	std::string identType;
 	// 检查是不是函数调用
 	if (_tokenVector[readIndex + 1] == "(") {
-		auto funcInfo = TableSpace::FuncQuery(globalCurrentToken);
+		auto funcInfo = TableSpace::FuncQuery(lookHead);
 		identType = funcInfo.retType == TableSpace::Int ? "" : "null";
 	}
 	else {
 		// 从符号表中取该变量名的相关信息
-		TableSpace::TableItem identInfo = TableSpace::query(globalCurrentToken);
+		TableSpace::TableItem identInfo = TableSpace::query(lookHead);
 		identType = identInfo.type;
 
 		if (identInfo.kind == TableSpace::null) { // 从变量符号表中没有查到相关信息
 			// 判断是不是当前函数形参
 			std::vector<std::pair<std::string, std::string>> typeNameVector = TableSpace::getLastestFunc().typeNameVector;
 			for (const auto& pair : typeNameVector) {
-				if (pair.second == globalCurrentToken) { // 是形参变量
+				if (pair.second == lookHead) { // 是形参变量
 					identType = pair.first;
 					break;
 				}
@@ -1359,7 +1359,7 @@ std::shared_ptr<FuncRParamsNode> FuncRParams(size_t& funParamNum, const std::vec
 	//}
 	cur->exp.push_back(exp);
 	++funParamNum;
-	while (globalCurrentTokenName == "COMMA") { // ,
+	while (lookHeadName == "COMMA") { // ,
 		matchTokenComma(); // ,
 		auto exp = Exp();
 		if (exp->lexeme != "") {  // 说明是一个变量
@@ -1386,7 +1386,7 @@ std::shared_ptr<NumberNode> Number() {
 std::shared_ptr<IntConstNode> IntConst() {
 	auto cur = std::make_shared<IntConstNode>("IntConst");
 
-	if (globalCurrentToken == "0") { // 匹配终结符0
+	if (lookHead == "0") { // 匹配终结符0
 		matchTokenZero();
 	}
 	else {
@@ -1398,9 +1398,9 @@ std::shared_ptr<IntConstNode> IntConst() {
 // 36-十进制数
 std::shared_ptr<DecimalConstNode> decimal_const() {
 	auto cur = std::make_shared<DecimalConstNode>("decimal_const");
-	cur->val = std::stoi(globalCurrentToken);
+	cur->val = std::stoi(lookHead);
 
-	size_t currentTokenLen = globalCurrentToken.size();
+	size_t currentTokenLen = lookHead.size();
 	if (currentTokenLen == 1) {
 		cur->non_zero_digit = nonzero_digit();
 	}
@@ -1421,9 +1421,9 @@ std::shared_ptr<NonzeroDigitNode> nonzero_digit() {
 std::shared_ptr<UnaryOpNode> UnaryOp() {
 	auto cur = std::make_shared<UnaryOpNode>("UnaryOp");
 
-	if (globalCurrentTokenName == "PLUS")
+	if (lookHeadName == "PLUS")
 		matchTokenPlus();
-	else if (globalCurrentTokenName == "MINU")
+	else if (lookHeadName == "MINU")
 		matchTokenMinu();
 	else matchTokenNot();
 	outFileParserResult("UnaryOp");
@@ -1447,8 +1447,8 @@ void contextSwitch(const std::vector<std::string>& token,
 		_tokenVector, 
 		_tokenNameVector, 
 		readIndex,
-		globalCurrentToken,
-		globalCurrentTokenName,
+		lookHead,
+		lookHeadName,
 		LexOut,
 		ParserOut,
 		ErrorOut,
@@ -1464,7 +1464,7 @@ void contextSwitch(const std::vector<std::string>& token,
 	ax_token = _tokenVector;
 	ax_name = _tokenNameVector;
 	ax_current_token = globalCurrentToken;
-	ax_current_name = globalCurrentTokenName;*/
+	ax_current_name = lookHeadName;*/
 
 	// ----------------------------
 	LexOut = false;
@@ -1473,8 +1473,8 @@ void contextSwitch(const std::vector<std::string>& token,
 	readIndex = 0;
 	_tokenVector = token;
 	_tokenNameVector = tokenName;
-	globalCurrentToken = _tokenVector[readIndex];
-	globalCurrentTokenName = _tokenNameVector[readIndex];
+	lookHead = _tokenVector[readIndex];
+	lookHeadName = _tokenNameVector[readIndex];
 
 	// 开启语义分析
 	isSemantic = true;
@@ -1493,8 +1493,8 @@ void contextReload() {
 	_tokenVector = cur.ax_token;
 	_tokenNameVector = cur.ax_name;
 	readIndex = cur.ax_read;
-	globalCurrentToken = cur.ax_current_token;
-	globalCurrentTokenName = cur.ax_current_name;
+	lookHead = cur.ax_current_token;
+	lookHeadName = cur.ax_current_name;
 
 	// 关闭语义分析
 	isSemantic = cur.ax_is_semantic;

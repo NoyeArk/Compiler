@@ -132,6 +132,7 @@
   <ItemGroup>
     <ClCompile Include="front\error_handle.cpp" />
     <ClCompile Include="front\lex.cpp" />
+    <ClCompile Include="front\match_token.cpp" />
     <ClCompile Include="front\parser.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="opt\ast.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="define.h" />
     <ClInclude Include="front\error_handle.h" />
     <ClInclude Include="front\lex.h" />
+    <ClInclude Include="front\match_token.h" />
     <ClInclude Include="front\parser.h" />
     <ClInclude Include="mid\ast.h" />
     <ClInclude Include="opt\table.h" />
