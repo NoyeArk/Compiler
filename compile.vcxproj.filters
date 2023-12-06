@@ -1,0 +1,87 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="头文件\front">
+      <UniqueIdentifier>{d487797a-b764-4621-9a77-7fa1eddcccba}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\front">
+      <UniqueIdentifier>{1a62f498-73ec-4e72-bf40-6aba3a212760}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\mid">
+      <UniqueIdentifier>{d0eb0bb1-865c-4bcb-bff1-956046f0bd14}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\mid">
+      <UniqueIdentifier>{17ef738e-4e42-47bd-9e98-9c2fa5911eb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\utils">
+      <UniqueIdentifier>{3b590b57-dca9-4ab5-920f-00d26c7ef197}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\utils">
+      <UniqueIdentifier>{4bee3e1d-2bc6-4cac-8ce0-0961ddeb21bd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\opt">
+      <UniqueIdentifier>{a7eda29a-a0f0-4ba3-af6c-3f88e7d34d7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\opt">
+      <UniqueIdentifier>{c3078ec8-f338-4b28-8409-a9803dcf9b17}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="front\lex.cpp">
+      <Filter>源文件\front</Filter>
+    </ClCompile>
+    <ClCompile Include="front\parser.cpp">
+      <Filter>源文件\front</Filter>
+    </ClCompile>
+    <ClCompile Include="front\error_handle.cpp">
+      <Filter>源文件\front</Filter>
+    </ClCompile>
+    <ClCompile Include="opt\ast.cpp">
+      <Filter>源文件\mid</Filter>
+    </ClCompile>
+    <ClCompile Include="utils\utils.cpp">
+      <Filter>源文件\utils</Filter>
+    </ClCompile>
+    <ClCompile Include="opt\table.cpp">
+      <Filter>源文件\opt</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="define.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="front\lex.h">
+      <Filter>头文件\front</Filter>
+    </ClInclude>
+    <ClInclude Include="front\parser.h">
+      <Filter>头文件\front</Filter>
+    </ClInclude>
+    <ClInclude Include="front\error_handle.h">
+      <Filter>头文件\front</Filter>
+    </ClInclude>
+    <ClInclude Include="utils\utils.h">
+      <Filter>头文件\utils</Filter>
+    </ClInclude>
+    <ClInclude Include="opt\table.h">
+      <Filter>头文件\opt</Filter>
+    </ClInclude>
+    <ClInclude Include="mid\ast.h">
+      <Filter>头文件\mid</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
