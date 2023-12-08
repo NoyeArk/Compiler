@@ -35,8 +35,16 @@
 #include <memory.h>
 #include <cmath>
 
+typedef enum {
+	emNull = 10,
+	emInLoop,   // 循环体
+	emInFunc,   // 函数定义
+	emFuncUse,  // 函数调用
+	emMain      // main函数
+}EmFlagIdent;
+
 static bool LexOut = false;
-static bool ParserOut = false;
+static bool ParserOut = true;
 static bool ErrorOut = false;
 static const bool CodeOut = true;
 

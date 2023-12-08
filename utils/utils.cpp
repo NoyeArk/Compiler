@@ -118,3 +118,30 @@ void printResult() {
 
     input_file.close();
 }
+
+//void GetNextToken() { // 同时输出当前匹配的终结符信息到文件中
+//    if (outputFile.is_open() && LexOut) {
+//        outputFile << lookHeadName << " " << _tokenVector[readIndex] << std::endl;
+//    }
+//    if (readIndex + 1 < _tokenNameVector.size()) {
+//        lookHead = _tokenVector[readIndex + 1];
+//        lookHeadName = _tokenNameVector[++readIndex];
+//    }
+//}
+//
+//void PrintLookHead() { // 往后打印10个数字
+//    assert(readIndex + 10 < _tokenNameVector.size());
+//    for (int ii = 0; ii < 10; ii++)
+//        std::cout << _tokenVector[readIndex + ii] << " ";
+//    std::cout << std::endl;
+//}
+//
+//bool isInfunction() {
+//    for (const EmFlagIdent flag : flagStack) {
+//        if (flag == emInFunc)
+//            return true;
+//    }
+//    return false;
+//}
+
+

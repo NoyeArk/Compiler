@@ -75,24 +75,6 @@ static EmType t = emTypeNull;  // 全局变量变量类型
 static int w = 0;  // 全局变量变量长度
 static int offset = 0;
 
-void gen(const bool& isOut,  // 判断是否进行输出
-		 const int& codeType, 
-		 const int& op1, 
-		 const std::string& opType = "NULL", 
-		 const int& op2 = -1, 
-		 const std::string& tar="NULL");
-
-// 此处op2的默认为了匹配x = 0的情况
-void gen(const bool& isOut,
-		 const int& codeType, 
-		 const std::string& op1, 
-		 const std::string& opType, 
-		 const std::string& op2="NULL",
-	 	 const std::string& tar = "NULL");
-void flushCodeBuffer(int _true, int _false, int ifNum);
-int label();
-void setLineNum(const int& num);
-void rrGoto(const int& line1, const int& line2=-1);
 
 struct BaseNode {
 public:
@@ -104,6 +86,11 @@ public:
 
 };
 
+struct MNode : public BaseNode {
+	using BaseNode::BaseNode;
+
+	int quad;
+};
 // 1 CompUnit
 struct CompUnitNode : public BaseNode {
 	using BaseNode::BaseNode;
@@ -284,6 +271,8 @@ struct CondNode : public BaseNode {
 	int _true;  // 对应的是行数
 	int _false;
 	bool cond;
+
+	
 };
 // 22 FormatString
 struct FormatStringNode : public BaseNode {
@@ -313,32 +302,52 @@ struct LOrExpNode : public BaseNode {
 	using BaseNode::BaseNode;
 	std::shared_ptr<LAndExpNode> land_exp;
 	std::shared_ptr<LOrExp_Node> _lor_exp;
+	std::shared_ptr<MNode> m;
 
 	bool cond;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 struct LOrExp_Node : public BaseNode {
 	using BaseNode::BaseNode;
 	std::shared_ptr<LAndExpNode> land_exp;
 	std::shared_ptr<LOrExp_Node> _lor_exp;
+	std::shared_ptr<MNode> m;
 
 	std::string op_type;
 	bool cond;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 // 25 LAndExp
 struct LAndExpNode : public BaseNode {
 	using BaseNode::BaseNode;
 	std::shared_ptr<EqExpNode> eq_exp;
 	std::shared_ptr<LAndExp_Node> _land_exp;
+	std::shared_ptr<MNode> m;
 
 	bool cond;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 struct LAndExp_Node : public BaseNode {
 	using BaseNode::BaseNode;
 	std::shared_ptr<EqExpNode> eq_exp;
 	std::shared_ptr<LAndExp_Node> _land_exp;
+	std::shared_ptr<MNode> m;
 
 	std::string op_type;
 	bool cond;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 // 26 EqExp
 struct EqExpNode : public BaseNode {
@@ -347,6 +356,10 @@ struct EqExpNode : public BaseNode {
 	std::shared_ptr<EqExp_Node> _eq_exp;
 
 	bool cond;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 struct EqExp_Node : public BaseNode {
 	using BaseNode::BaseNode;
@@ -375,6 +388,10 @@ struct RelExpNode : public BaseNode {
 	
 	bool cond;  // 用来表示该条件表达式的值 true | false
 	int val;
+
+	// 代码回填
+	std::vector<int> truelist;
+	std::vector<int> falselist;
 };
 struct RelExp_Node : public BaseNode {
 	using BaseNode::BaseNode;
@@ -458,7 +475,6 @@ struct ConstInitValNode : public BaseNode {
 // 40 ConstDef
 struct ConstDefNode : public BaseNode {
 	using BaseNode::BaseNode;
-
 };
 
 

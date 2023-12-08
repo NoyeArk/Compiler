@@ -107,6 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>D:\horiki\code\compile\compile\utils;D:\horiki\code\compile\compile\opt;D:\horiki\code\compile\compile\mid;D:\horiki\code\compile\compile\front;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,7 +136,8 @@
     <ClCompile Include="front\match_token.cpp" />
     <ClCompile Include="front\parser.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="opt\ast.cpp" />
+    <ClCompile Include="mid\ast.cpp" />
+    <ClCompile Include="mid\code_gen.cpp" />
     <ClCompile Include="opt\table.cpp" />
     <ClCompile Include="utils\utils.cpp" />
   </ItemGroup>
@@ -146,8 +148,12 @@
     <ClInclude Include="front\match_token.h" />
     <ClInclude Include="front\parser.h" />
     <ClInclude Include="mid\ast.h" />
+    <ClInclude Include="mid\code_gen.h" />
     <ClInclude Include="opt\table.h" />
     <ClInclude Include="utils\utils.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="testfile.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

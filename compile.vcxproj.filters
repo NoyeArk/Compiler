@@ -51,9 +51,6 @@
     <ClCompile Include="front\error_handle.cpp">
       <Filter>源文件\front</Filter>
     </ClCompile>
-    <ClCompile Include="opt\ast.cpp">
-      <Filter>源文件\mid</Filter>
-    </ClCompile>
     <ClCompile Include="utils\utils.cpp">
       <Filter>源文件\utils</Filter>
     </ClCompile>
@@ -62,6 +59,12 @@
     </ClCompile>
     <ClCompile Include="front\match_token.cpp">
       <Filter>源文件\front</Filter>
+    </ClCompile>
+    <ClCompile Include="mid\ast.cpp">
+      <Filter>源文件\mid</Filter>
+    </ClCompile>
+    <ClCompile Include="mid\code_gen.cpp">
+      <Filter>源文件\mid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -89,5 +92,13 @@
     <ClInclude Include="front\match_token.h">
       <Filter>头文件\front</Filter>
     </ClInclude>
+    <ClInclude Include="mid\code_gen.h">
+      <Filter>头文件\mid</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="testfile.txt">
+      <Filter>资源文件</Filter>
+    </Text>
   </ItemGroup>
 </Project>

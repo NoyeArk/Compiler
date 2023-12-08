@@ -19,4 +19,9 @@ std::string transName(std::string& token, bool strcon = false);
 bool checkBeginNum(std::string str);
 void printResult();
 
+//void GetNextToken();
+//void PrintLookHead();
+//bool isInfunction();
+
+
 #endif // !UTILS_H
